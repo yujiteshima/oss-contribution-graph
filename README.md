@@ -6,7 +6,7 @@ A tool that displays contributions to multiple OSS projects in a single color-co
 
 ## Preview
 
-![OSS Contribution Graph](https://your-deployment.vercel.app/api/graph?username=yujiteshima&orgs=rails:CC0000:Rails,hotwired:1a1a1a:Hotwire&months=6)
+![OSS Contribution Graph](https://oss-contribution-graph.vercel.app/api/graph?demo=true)
 
 ## Usage
 
