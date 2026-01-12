@@ -120,10 +120,11 @@ function generateSVG(gridData, organizations, months, username) {
   const weeks = gridData.length;
   const padding = 40;
   const legendHeight = 30;
-  const titleHeight = 30;
-  
+  const titleHeight = 25;
+  const monthLabelHeight = 20;
+
   const width = padding + weeks * (cellSize + gap) + padding;
-  const height = titleHeight + 7 * (cellSize + gap) + legendHeight + padding;
+  const height = titleHeight + monthLabelHeight + 7 * (cellSize + gap) + legendHeight + 10;
   
   // 月ラベルを計算
   const monthLabels = [];
@@ -225,11 +226,12 @@ function generateSVG(gridData, organizations, months, username) {
   };
 
   // セルを生成
+  const gridTop = titleHeight + monthLabelHeight;
   let cells = '';
   gridData.forEach((week, weekIdx) => {
     week.forEach((day, dayIdx) => {
       const x = padding + weekIdx * (cellSize + gap);
-      const y = titleHeight + dayIdx * (cellSize + gap);
+      const y = gridTop + dayIdx * (cellSize + gap);
       const fill = day ? getCellFillWithGradient(day) : '#ebedf0';
       const opacity = day ? 1 : 0.3;
       
@@ -247,10 +249,11 @@ function generateSVG(gridData, organizations, months, username) {
   // 凡例を生成
   let legend = '';
   let legendX = padding;
+  const legendY = gridTop + 7 * (cellSize + gap) + 10;
   organizations.forEach((org, idx) => {
     legend += `
-      <rect x="${legendX}" y="${titleHeight + 7 * (cellSize + gap) + 10}" width="12" height="12" rx="2" fill="${org.color}" />
-      <text x="${legendX + 16}" y="${titleHeight + 7 * (cellSize + gap) + 20}" font-size="10" fill="#666">${org.label || org.name}</text>
+      <rect x="${legendX}" y="${legendY}" width="12" height="12" rx="2" fill="${org.color}" />
+      <text x="${legendX + 16}" y="${legendY + 10}" font-size="10" fill="#666">${org.label || org.name}</text>
     `;
     legendX += (org.label || org.name).length * 7 + 30;
   });
@@ -258,14 +261,14 @@ function generateSVG(gridData, organizations, months, username) {
   // 月ラベルを生成
   let monthLabelsStr = '';
   monthLabels.forEach(label => {
-    monthLabelsStr += `<text x="${label.x}" y="${titleHeight - 8}" font-size="10" fill="#666">${label.name}</text>`;
+    monthLabelsStr += `<text x="${label.x}" y="${titleHeight + monthLabelHeight - 5}" font-size="10" fill="#666">${label.name}</text>`;
   });
 
   // 曜日ラベル
   const dayLabels = `
-    <text x="${padding - 5}" y="${titleHeight + 1 * (cellSize + gap) + cellSize/2 + 3}" font-size="9" fill="#666" text-anchor="end">Mon</text>
-    <text x="${padding - 5}" y="${titleHeight + 3 * (cellSize + gap) + cellSize/2 + 3}" font-size="9" fill="#666" text-anchor="end">Wed</text>
-    <text x="${padding - 5}" y="${titleHeight + 5 * (cellSize + gap) + cellSize/2 + 3}" font-size="9" fill="#666" text-anchor="end">Fri</text>
+    <text x="${padding - 5}" y="${gridTop + 1 * (cellSize + gap) + cellSize/2 + 3}" font-size="9" fill="#666" text-anchor="end">Mon</text>
+    <text x="${padding - 5}" y="${gridTop + 3 * (cellSize + gap) + cellSize/2 + 3}" font-size="9" fill="#666" text-anchor="end">Wed</text>
+    <text x="${padding - 5}" y="${gridTop + 5 * (cellSize + gap) + cellSize/2 + 3}" font-size="9" fill="#666" text-anchor="end">Fri</text>
   `;
 
   // タイトル
