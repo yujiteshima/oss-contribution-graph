@@ -2,7 +2,7 @@
 
 const GITHUB_GRAPHQL_API = 'https://api.github.com/graphql';
 
-// 組織IDを取得するクエリ
+// Query to fetch organization ID
 const ORG_ID_QUERY = `
 query($login: String!) {
   organization(login: $login) {
@@ -11,7 +11,7 @@ query($login: String!) {
 }
 `;
 
-// コントリビューションデータを取得するクエリ
+// Query to fetch contribution data
 const CONTRIBUTION_QUERY = `
 query($username: String!, $from: DateTime!, $to: DateTime!, $orgId: ID) {
   user(login: $username) {
@@ -30,7 +30,7 @@ query($username: String!, $from: DateTime!, $to: DateTime!, $orgId: ID) {
 }
 `;
 
-// GitHub APIを呼び出す
+// Call GitHub API
 async function fetchGitHub(query, variables, token) {
   const response = await fetch(GITHUB_GRAPHQL_API, {
     method: 'POST',
@@ -48,7 +48,7 @@ async function fetchGitHub(query, variables, token) {
   return response.json();
 }
 
-// 組織IDを取得
+// Fetch organization ID
 async function getOrgId(orgName, token) {
   try {
     const result = await fetchGitHub(ORG_ID_QUERY, { login: orgName }, token);
@@ -59,7 +59,7 @@ async function getOrgId(orgName, token) {
   }
 }
 
-// コントリビューションデータを取得
+// Fetch contribution data
 async function getContributions(username, orgId, from, to, token) {
   try {
     const result = await fetchGitHub(CONTRIBUTION_QUERY, {
@@ -88,7 +88,7 @@ async function getContributions(username, orgId, from, to, token) {
   }
 }
 
-// 日付範囲を計算
+// Calculate date range
 function getDateRange(months) {
   const to = new Date();
   const from = new Date();
@@ -96,14 +96,14 @@ function getDateRange(months) {
   return { from, to };
 }
 
-// セルサイズを計算
+// Calculate cell size
 function getCellSize(months) {
   if (months <= 3) return 12;
   if (months <= 6) return 10;
   return 7;
 }
 
-// 色をRGBに変換
+// Convert hex color to RGB
 function hexToRgb(hex) {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result ? {
@@ -113,7 +113,7 @@ function hexToRgb(hex) {
   } : { r: 0, g: 0, b: 0 };
 }
 
-// SVGを生成
+// Generate SVG
 function generateSVG(gridData, organizations, months, username) {
   const cellSize = getCellSize(months);
   const gap = 2;
@@ -126,7 +126,7 @@ function generateSVG(gridData, organizations, months, username) {
   const width = padding + weeks * (cellSize + gap) + padding;
   const height = titleHeight + monthLabelHeight + 7 * (cellSize + gap) + legendHeight + 10;
   
-  // 月ラベルを計算
+  // Calculate month labels
   const monthLabels = [];
   const { from } = getDateRange(months);
   const startDate = new Date(from);
@@ -147,7 +147,7 @@ function generateSVG(gridData, organizations, months, username) {
     }
   });
 
-  // セルの背景を取得
+  // Get cell background color
   const getCellFill = (day) => {
     if (!day || day.total === 0) return '#ebedf0';
     
@@ -157,14 +157,14 @@ function generateSVG(gridData, organizations, months, username) {
       return org?.color || '#39d353';
     }
     
-    // 複数の場合は最初の色（SVGではグラデーションが複雑なので）
-    // デフォルトでは混色を表現
+    // For multiple orgs, blend colors
+    // (SVG gradients are complex, so we use color mixing)
     const colors = orgs.map(orgName => {
       const org = organizations.find(o => o.name === orgName);
       return org?.color || '#39d353';
     });
     
-    // 2色の平均を取る
+    // Average two colors
     if (colors.length >= 2) {
       const rgb1 = hexToRgb(colors[0]);
       const rgb2 = hexToRgb(colors[1]);
@@ -179,7 +179,7 @@ function generateSVG(gridData, organizations, months, username) {
     return colors[0];
   };
 
-  // グラデーション定義を生成（複数組織用）
+  // Generate gradient definitions (for multiple orgs)
   let gradientDefs = '';
   let gradientId = 0;
   const gradientMap = new Map();
@@ -207,7 +207,7 @@ function generateSVG(gridData, organizations, months, username) {
     });
   });
 
-  // セルの塗りを取得（グラデーション対応）
+  // Get cell fill (with gradient support)
   const getCellFillWithGradient = (day) => {
     if (!day || day.total === 0) return '#ebedf0';
     
@@ -225,7 +225,7 @@ function generateSVG(gridData, organizations, months, username) {
     return getCellFill(day);
   };
 
-  // セルを生成
+  // Generate cells
   const gridTop = titleHeight + monthLabelHeight;
   let cells = '';
   gridData.forEach((week, weekIdx) => {
@@ -246,7 +246,7 @@ function generateSVG(gridData, organizations, months, username) {
     });
   });
 
-  // 凡例を生成
+  // Generate legend
   let legend = '';
   let legendX = padding;
   const legendY = gridTop + 7 * (cellSize + gap) + 10;
@@ -258,20 +258,20 @@ function generateSVG(gridData, organizations, months, username) {
     legendX += (org.label || org.name).length * 7 + 30;
   });
 
-  // 月ラベルを生成
+  // Generate month labels
   let monthLabelsStr = '';
   monthLabels.forEach(label => {
     monthLabelsStr += `<text x="${label.x}" y="${titleHeight + monthLabelHeight - 5}" font-size="10" fill="#666">${label.name}</text>`;
   });
 
-  // 曜日ラベル
+  // Day labels
   const dayLabels = `
     <text x="${padding - 5}" y="${gridTop + 1 * (cellSize + gap) + cellSize/2 + 3}" font-size="9" fill="#666" text-anchor="end">Mon</text>
     <text x="${padding - 5}" y="${gridTop + 3 * (cellSize + gap) + cellSize/2 + 3}" font-size="9" fill="#666" text-anchor="end">Wed</text>
     <text x="${padding - 5}" y="${gridTop + 5 * (cellSize + gap) + cellSize/2 + 3}" font-size="9" fill="#666" text-anchor="end">Fri</text>
   `;
 
-  // タイトル
+  // Title
   const title = `<text x="${padding}" y="18" font-size="14" font-weight="bold" fill="#333">🌈 OSS Contributions - ${username}</text>`;
 
   return `
@@ -293,14 +293,14 @@ function generateSVG(gridData, organizations, months, username) {
   `.trim();
 }
 
-// グリッドデータを生成
+// Generate grid data
 function generateGridData(contributionData, organizations, months) {
   const { from, to } = getDateRange(months);
   const weeks = [];
   let currentWeek = [];
   const current = new Date(from);
 
-  // 週の開始を日曜日に調整
+  // Adjust week start to Sunday
   const startDay = current.getDay();
   for (let i = 0; i < startDay; i++) {
     currentWeek.push(null);
@@ -341,7 +341,7 @@ function generateGridData(contributionData, organizations, months) {
   return weeks;
 }
 
-// デモデータを生成
+// Generate demo data
 function generateDemoData(organizations, months) {
   const { from, to } = getDateRange(months);
   const data = {};
@@ -351,7 +351,7 @@ function generateDemoData(organizations, months) {
     const current = new Date(from);
     while (current <= to) {
       const dateStr = current.toISOString().split('T')[0];
-      // ランダムにコントリビューション（15%の確率）
+      // Random contributions (15% probability)
       data[org.name][dateStr] = Math.random() > 0.85 ? Math.floor(Math.random() * 5) + 1 : 0;
       current.setDate(current.getDate() + 1);
     }
@@ -360,7 +360,7 @@ function generateDemoData(organizations, months) {
   return data;
 }
 
-// URLパラメータをパース
+// Parse URL parameters
 function parseOrgs(orgsParam) {
   // Format: rails:CC0000:Rails,hotwired:1a1a1a:Hotwire
   if (!orgsParam) {
@@ -380,9 +380,9 @@ function parseOrgs(orgsParam) {
   });
 }
 
-// メインハンドラー
+// Main handler
 export default async function handler(req, res) {
-  // CORSヘッダー
+  // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
 
@@ -391,7 +391,7 @@ export default async function handler(req, res) {
   const organizations = parseOrgs(orgs);
   const token = process.env.GITHUB_TOKEN;
 
-  // デバッグモード
+  // Debug mode
   if (debug === 'true') {
     res.setHeader('Content-Type', 'application/json');
     return res.status(200).json({
@@ -406,10 +406,10 @@ export default async function handler(req, res) {
   let contributionData;
 
   if (demo === 'true' || !token) {
-    // デモモードまたはトークンがない場合
+    // Demo mode or no token available
     contributionData = generateDemoData(organizations, monthsNum);
   } else {
-    // 実際のGitHubデータを取得
+    // Fetch actual GitHub data
     contributionData = {};
     const { from, to } = getDateRange(monthsNum);
     
