@@ -26,14 +26,18 @@ HTTP Request → api/graph.js → GitHub API (or demo data) → SVG generation �
 
 **Key modules:**
 
-- `api/graph.js` - Single Vercel serverless endpoint, handles HTTP request/response
+- `api/graph.js` - Main endpoint, returns SVG/PNG graph
+- `api/card.js` - OGP endpoint for social media link previews
 - `src/github/` - GitHub GraphQL API integration (client, queries, contribution parsing)
 - `src/svg/` - SVG generation (colors/blending, grid structure, complete SVG output)
 - `src/png/` - PNG conversion using resvg-js
 - `src/utils/` - Date range calculation and URL parameter parsing
 - `src/demo/` - Fake contribution data for testing without GitHub token
 
-**API endpoint:** `/api/graph`
+**API endpoints:**
+
+- `/api/graph` - Returns SVG/PNG image
+- `/api/card` - Returns HTML with OGP meta tags (for X/Twitter link previews)
 
 Query parameters: `username`, `orgs` (format: `org:HEX_COLOR:LABEL`), `months` (1-12), `format` (`svg`/`png`), `demo`, `debug`
 
@@ -56,6 +60,7 @@ npx vitest tests/utils/date.test.js
 ## Roadmap
 
 - [x] [#1](https://github.com/yujiteshima/oss-contribution-graph/issues/1) Add PNG output support for social media sharing
+- [x] [#10](https://github.com/yujiteshima/oss-contribution-graph/issues/10) Add OGP support for X (Twitter) link preview
 - [ ] [#2](https://github.com/yujiteshima/oss-contribution-graph/issues/2) Add theme support (dark mode and custom color schemes)
 - [ ] [#3](https://github.com/yujiteshima/oss-contribution-graph/issues/3) Add option to hide or customize graph title
 - [ ] [#4](https://github.com/yujiteshima/oss-contribution-graph/issues/4) Add support for specifying individual repositories

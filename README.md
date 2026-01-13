@@ -69,13 +69,23 @@ Examples:
 ![OSS Contributions](https://your-app.vercel.app/api/graph?username=yujiteshima&demo=true)
 ```
 
-### PNG Output (for Twitter/X, OGP images)
+### PNG Output (for embedding)
 
 ```markdown
 ![OSS Contributions](https://your-app.vercel.app/api/graph?username=yujiteshima&format=png)
 ```
 
-Use `format=png` for platforms that don't support SVG (Twitter/X, some chat apps, OGP images).
+Use `format=png` for platforms that don't support SVG.
+
+### Share on X (Twitter)
+
+Use `/api/card` endpoint for automatic image preview:
+
+```
+https://your-app.vercel.app/api/card?username=yujiteshima&orgs=rails:CC0000:Rails
+```
+
+Paste this URL on X → Graph image appears as link preview.
 
 ## Local Development
 
