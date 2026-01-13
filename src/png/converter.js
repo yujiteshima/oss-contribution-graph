@@ -25,6 +25,7 @@ export function convertSvgToPng(svgString, options = {}) {
     font: {
       fontBuffers: [fontBuffer],
       loadSystemFonts: false,
+      defaultFontFamily: 'Noto Sans',
     },
     fitTo: {
       mode: 'zoom',
