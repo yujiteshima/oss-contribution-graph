@@ -1,4 +1,15 @@
 // Parse URL parameters
+
+/**
+ * Parse and validate format parameter
+ * @param {string} formatParam - Format parameter from URL (svg or png)
+ * @returns {string} Validated format ('svg' or 'png')
+ */
+export function parseFormat(formatParam) {
+  const format = (formatParam || 'svg').toLowerCase();
+  return format === 'png' ? 'png' : 'svg';
+}
+
 // Format: rails:CC0000:Rails,hotwired:1a1a1a:Hotwire
 export function parseOrgs(orgsParam) {
   if (!orgsParam) {

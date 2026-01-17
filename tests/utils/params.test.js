@@ -1,5 +1,36 @@
 import { describe, it, expect } from 'vitest';
-import { parseOrgs } from '../../src/utils/params.js';
+import { parseOrgs, parseFormat } from '../../src/utils/params.js';
+
+describe('parseFormat', () => {
+  it('returns svg as default when param is undefined', () => {
+    expect(parseFormat(undefined)).toBe('svg');
+  });
+
+  it('returns svg as default when param is empty string', () => {
+    expect(parseFormat('')).toBe('svg');
+  });
+
+  it('returns svg when param is svg', () => {
+    expect(parseFormat('svg')).toBe('svg');
+  });
+
+  it('returns png when param is png', () => {
+    expect(parseFormat('png')).toBe('png');
+  });
+
+  it('handles uppercase PNG', () => {
+    expect(parseFormat('PNG')).toBe('png');
+  });
+
+  it('handles mixed case Svg', () => {
+    expect(parseFormat('Svg')).toBe('svg');
+  });
+
+  it('returns svg for unknown formats', () => {
+    expect(parseFormat('jpg')).toBe('svg');
+    expect(parseFormat('gif')).toBe('svg');
+  });
+});
 
 describe('parseOrgs', () => {
   it('returns default orgs when param is undefined', () => {

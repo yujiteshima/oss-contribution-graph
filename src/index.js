@@ -1,6 +1,9 @@
 // Utils
 export { getDateRange, getCellSize } from './utils/date.js';
-export { parseOrgs } from './utils/params.js';
+export { parseOrgs, parseFormat } from './utils/params.js';
+
+// PNG
+export { convertSvgToPng } from './png/converter.js';
 
 // GitHub
 export { fetchGitHub } from './github/client.js';

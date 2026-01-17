@@ -1,11 +1,12 @@
-// Vercel Serverless Function - OSS Contribution Graph SVG Generator
+// Vercel Serverless Function - OSS Contribution Graph SVG/PNG Generator
 
 import { getDateRange } from '../src/utils/date.js';
-import { parseOrgs } from '../src/utils/params.js';
+import { parseOrgs, parseFormat } from '../src/utils/params.js';
 import { getOrgId, getContributions } from '../src/github/contributions.js';
 import { generateGridData } from '../src/svg/grid.js';
 import { generateSVG } from '../src/svg/generator.js';
 import { generateDemoData } from '../src/demo/data.js';
+import { convertSvgToPng } from '../src/png/converter.js';
 
 // Main handler
 export default async function handler(req, res) {
@@ -13,9 +14,10 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
 
-  const { username = 'yujiteshima', orgs, months = '6', demo, debug } = req.query;
+  const { username = 'yujiteshima', orgs, months = '6', format, demo, debug } = req.query;
   const monthsNum = Math.min(Math.max(parseInt(months) || 6, 1), 12);
   const organizations = parseOrgs(orgs);
+  const outputFormat = parseFormat(format);
   const token = process.env.GITHUB_TOKEN;
 
   // Debug mode
@@ -51,8 +53,15 @@ export default async function handler(req, res) {
   }
 
   const gridData = generateGridData(contributionData, organizations, monthsNum);
-  const svg = generateSVG(gridData, organizations, monthsNum, username);
 
-  res.setHeader('Content-Type', 'image/svg+xml');
-  res.status(200).send(svg);
+  if (outputFormat === 'png') {
+    const svg = generateSVG(gridData, organizations, monthsNum, username, { forPng: true });
+    const png = convertSvgToPng(svg);
+    res.setHeader('Content-Type', 'image/png');
+    res.status(200).send(png);
+  } else {
+    const svg = generateSVG(gridData, organizations, monthsNum, username);
+    res.setHeader('Content-Type', 'image/svg+xml');
+    res.status(200).send(svg);
+  }
 }

@@ -2,7 +2,8 @@ import { getDateRange, getCellSize } from '../utils/date.js';
 import { generateGradients, getCellFillWithGradient } from './colors.js';
 
 // Generate SVG
-export function generateSVG(gridData, organizations, months, username) {
+// options.forPng: if true, removes emoji from title for PNG compatibility
+export function generateSVG(gridData, organizations, months, username, options = {}) {
   const cellSize = getCellSize(months);
   const gap = 2;
   const weeks = gridData.length;
@@ -83,8 +84,9 @@ export function generateSVG(gridData, organizations, months, username) {
     <text x="${padding - 5}" y="${gridTop + 5 * (cellSize + gap) + cellSize/2 + 3}" font-size="9" fill="#666" text-anchor="end">Fri</text>
   `;
 
-  // Title
-  const title = `<text x="${padding}" y="18" font-size="14" font-weight="bold" fill="#333">🌈 OSS Contributions - ${username}</text>`;
+  // Title (emoji removed for PNG compatibility when forPng is true)
+  const titlePrefix = options.forPng ? '' : '🌈 ';
+  const title = `<text x="${padding}" y="18" font-size="14" font-weight="bold" fill="#333">${titlePrefix}OSS Contributions - ${username}</text>`;
 
   return `
 <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">

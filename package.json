@@ -5,7 +5,7 @@
   "description": "Display OSS contributions from multiple organizations in a single graph",
   "main": "api/graph.js",
   "scripts": {
-    "dev": "vercel dev",
+    "start": "vercel dev",
     "deploy": "vercel --prod",
     "test": "vitest",
     "test:run": "vitest run",
@@ -24,5 +24,8 @@
   "devDependencies": {
     "vercel": "^32.0.0",
     "vitest": "^2.0.0"
+  },
+  "dependencies": {
+    "@resvg/resvg-js": "^2.6.2"
   }
 }
