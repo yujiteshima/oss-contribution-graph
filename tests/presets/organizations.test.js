@@ -58,6 +58,7 @@ describe('getOrganizationName', () => {
   it('returns mapped org name for presets with org property', () => {
     expect(getOrganizationName('react')).toBe('facebook');
     expect(getOrganizationName('terraform')).toBe('hashicorp');
+    expect(getOrganizationName('htmx')).toBe('bigskysoftware');
   });
 
   it('resolves alias to canonical name', () => {

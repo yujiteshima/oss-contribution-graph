@@ -113,6 +113,13 @@ describe('parseOrgs', () => {
     ]);
   });
 
+  it('resolves htmx to bigskysoftware org', () => {
+    const result = parseOrgs('htmx');
+    expect(result).toEqual([
+      { name: 'bigskysoftware', color: '#3366CC', label: 'htmx' },
+    ]);
+  });
+
   it('allows explicit color to override preset', () => {
     const result = parseOrgs('vuejs:FF0000:Custom Vue');
     expect(result).toEqual([

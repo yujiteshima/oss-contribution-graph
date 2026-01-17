@@ -11,7 +11,7 @@ export const ORGANIZATION_PRESETS = {
   sveltejs: { color: '#FF3E00', label: 'Svelte' },
   nodejs: { color: '#339933', label: 'Node.js' },
   denoland: { color: '#000000', label: 'Deno' },
-  htmx: { color: '#3366CC', label: 'htmx' },
+  htmx: { color: '#3366CC', label: 'htmx', org: 'bigskysoftware' },
   'bigskysoftware': { color: '#3366CC', label: 'htmx' },
 
   // Backend / Infrastructure
