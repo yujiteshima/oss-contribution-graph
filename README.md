@@ -35,7 +35,6 @@ Configure the following environment variable in the Vercel dashboard:
 | `username` | GitHub username | `yujiteshima` | `yujiteshima` |
 | `orgs` | Organization settings (comma-separated) | rails, hotwired | `rails:CC0000:Rails,hotwired:1a1a1a:Hotwire` |
 | `months` | Display period (1-12) | `6` | `3`, `6`, `12` |
-| `format` | Output format | `svg` | `svg`, `png` |
 | `demo` | Demo mode | `false` | `true` |
 
 ### orgs Parameter Format
@@ -69,24 +68,6 @@ Examples:
 ![OSS Contributions](https://your-app.vercel.app/api/graph?username=yujiteshima&demo=true)
 ```
 
-### PNG Output (for embedding)
-
-```markdown
-![OSS Contributions](https://your-app.vercel.app/api/graph?username=yujiteshima&format=png)
-```
-
-Use `format=png` for platforms that don't support SVG.
-
-### Share on X (Twitter)
-
-Use `/api/card` endpoint for automatic image preview:
-
-```
-https://your-app.vercel.app/api/card?username=yujiteshima&orgs=rails:CC0000:Rails
-```
-
-Paste this URL on X → Graph image appears as link preview.
-
 ## Local Development
 
 ```bash
@@ -110,7 +91,7 @@ npm run dev
 1. Fetch organization ID via GitHub GraphQL API
 2. Filter contributions per organization using `contributionsCollection(organizationID: $orgId)`
 3. Merge data from multiple organizations
-4. Output as SVG or PNG image
+4. Output as SVG image
 
 ## License
 

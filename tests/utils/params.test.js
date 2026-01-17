@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseOrgs, parseFormat } from '../../src/utils/params.js';
+import { parseOrgs } from '../../src/utils/params.js';
 
 describe('parseOrgs', () => {
   it('returns default orgs when param is undefined', () => {
@@ -65,40 +65,5 @@ describe('parseOrgs', () => {
     const result = parseOrgs('rails:CC0000:Rails,hotwired:1a1a1a:Hotwire,honojs:E36002:Hono');
     expect(result).toHaveLength(3);
     expect(result[2]).toEqual({ name: 'honojs', color: '#E36002', label: 'Hono' });
-  });
-});
-
-describe('parseFormat', () => {
-  it('returns svg by default when param is undefined', () => {
-    expect(parseFormat(undefined)).toBe('svg');
-  });
-
-  it('returns svg when param is empty string', () => {
-    expect(parseFormat('')).toBe('svg');
-  });
-
-  it('returns svg when param is "svg"', () => {
-    expect(parseFormat('svg')).toBe('svg');
-  });
-
-  it('returns png when param is "png"', () => {
-    expect(parseFormat('png')).toBe('png');
-  });
-
-  it('handles uppercase PNG', () => {
-    expect(parseFormat('PNG')).toBe('png');
-  });
-
-  it('handles mixed case', () => {
-    expect(parseFormat('Png')).toBe('png');
-  });
-
-  it('trims whitespace', () => {
-    expect(parseFormat('  png  ')).toBe('png');
-  });
-
-  it('returns svg for invalid format', () => {
-    expect(parseFormat('jpeg')).toBe('svg');
-    expect(parseFormat('gif')).toBe('svg');
   });
 });

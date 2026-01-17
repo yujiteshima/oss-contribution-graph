@@ -1,8 +1,7 @@
 // Vercel Serverless Function - OSS Contribution Graph SVG Generator
 
 import { getDateRange } from '../src/utils/date.js';
-import { parseOrgs, parseFormat } from '../src/utils/params.js';
-import { convertSvgToPng } from '../src/png/converter.js';
+import { parseOrgs } from '../src/utils/params.js';
 import { getOrgId, getContributions } from '../src/github/contributions.js';
 import { generateGridData } from '../src/svg/grid.js';
 import { generateSVG } from '../src/svg/generator.js';
@@ -14,10 +13,9 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
 
-  const { username = 'yujiteshima', orgs, months = '6', demo, debug, format } = req.query;
+  const { username = 'yujiteshima', orgs, months = '6', demo, debug } = req.query;
   const monthsNum = Math.min(Math.max(parseInt(months) || 6, 1), 12);
   const organizations = parseOrgs(orgs);
-  const outputFormat = parseFormat(format);
   const token = process.env.GITHUB_TOKEN;
 
   // Debug mode
@@ -54,13 +52,6 @@ export default async function handler(req, res) {
 
   const gridData = generateGridData(contributionData, organizations, monthsNum);
   const svg = generateSVG(gridData, organizations, monthsNum, username);
-
-  if (outputFormat === 'png') {
-    res.setHeader('Cache-Control', 's-maxage=7200, stale-while-revalidate');
-    res.setHeader('Content-Type', 'image/png');
-    const pngBuffer = convertSvgToPng(svg);
-    return res.status(200).send(pngBuffer);
-  }
 
   res.setHeader('Content-Type', 'image/svg+xml');
   res.status(200).send(svg);
