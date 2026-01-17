@@ -78,11 +78,54 @@ describe('parseOrgs', () => {
     ]);
   });
 
-  it('handles org with only name', () => {
+  it('handles org with only name (no preset)', () => {
+    const result = parseOrgs('unknown-org');
+    expect(result).toEqual([
+      { name: 'unknown-org', color: '#39d353', label: 'unknown-org' },
+    ]);
+  });
+
+  it('resolves preset color for known organization', () => {
     const result = parseOrgs('vuejs');
     expect(result).toEqual([
-      { name: 'vuejs', color: '#39d353', label: 'vuejs' },
+      { name: 'vuejs', color: '#42B883', label: 'Vue.js' },
     ]);
+  });
+
+  it('resolves preset color for kubernetes', () => {
+    const result = parseOrgs('kubernetes');
+    expect(result).toEqual([
+      { name: 'kubernetes', color: '#326CE5', label: 'Kubernetes' },
+    ]);
+  });
+
+  it('resolves alias to preset', () => {
+    const result = parseOrgs('k8s');
+    expect(result).toEqual([
+      { name: 'kubernetes', color: '#326CE5', label: 'Kubernetes' },
+    ]);
+  });
+
+  it('resolves react alias to facebook org', () => {
+    const result = parseOrgs('react');
+    expect(result).toEqual([
+      { name: 'facebook', color: '#61DAFB', label: 'React' },
+    ]);
+  });
+
+  it('allows explicit color to override preset', () => {
+    const result = parseOrgs('vuejs:FF0000:Custom Vue');
+    expect(result).toEqual([
+      { name: 'vuejs', color: '#FF0000', label: 'Custom Vue' },
+    ]);
+  });
+
+  it('supports mixed preset and explicit orgs', () => {
+    const result = parseOrgs('rails,custom:FFFFFF:Custom Org,kubernetes');
+    expect(result).toHaveLength(3);
+    expect(result[0]).toEqual({ name: 'rails', color: '#CC0000', label: 'Rails' });
+    expect(result[1]).toEqual({ name: 'custom', color: '#FFFFFF', label: 'Custom Org' });
+    expect(result[2]).toEqual({ name: 'kubernetes', color: '#326CE5', label: 'Kubernetes' });
   });
 
   it('trims whitespace from values', () => {

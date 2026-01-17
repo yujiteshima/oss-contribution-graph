@@ -1,5 +1,10 @@
 // Parse URL parameters
 
+import { getOrganizationPreset, getOrganizationName } from '../presets/organizations.js';
+
+// Default color for organizations without a preset
+const DEFAULT_COLOR = '#39d353';
+
 /**
  * Parse and validate format parameter
  * @param {string} formatParam - Format parameter from URL (svg or png)
@@ -10,7 +15,16 @@ export function parseFormat(formatParam) {
   return format === 'png' ? 'png' : 'svg';
 }
 
-// Format: rails:CC0000:Rails,hotwired:1a1a1a:Hotwire
+/**
+ * Parse organizations parameter
+ * Supports three formats:
+ * 1. Preset only: "rails,vuejs,kubernetes"
+ * 2. Full specification: "rails:CC0000:Rails,custom:FFFFFF:Custom Org"
+ * 3. Mixed: "rails,custom:FFFFFF:Custom Org"
+ *
+ * @param {string} orgsParam - Organizations parameter from URL
+ * @returns {Array<{name: string, color: string, label: string}>}
+ */
 export function parseOrgs(orgsParam) {
   if (!orgsParam) {
     // Default values for demo purposes
@@ -22,11 +36,47 @@ export function parseOrgs(orgsParam) {
   }
 
   return orgsParam.split(',').map(org => {
-    const [name, color, label] = org.split(':');
+    const parts = org.split(':');
+    const inputName = parts[0].trim();
+
+    // Check if explicit format is used (has colons)
+    // Format: name:color:label or name::label or name:color
+    if (parts.length >= 2) {
+      const colorPart = parts[1]?.trim();
+      const labelPart = parts[2]?.trim();
+
+      // Determine color: use explicit if provided, else try preset, else default
+      let color = DEFAULT_COLOR;
+      if (colorPart) {
+        color = `#${colorPart}`;
+      } else {
+        const preset = getOrganizationPreset(inputName);
+        color = preset?.color || DEFAULT_COLOR;
+      }
+
+      // Determine label: use explicit if provided, else use name
+      const label = labelPart || inputName;
+
+      return { name: inputName, color, label };
+    }
+
+    // Preset only (no colons): try to resolve from presets
+    const preset = getOrganizationPreset(inputName);
+    const actualOrgName = getOrganizationName(inputName);
+
+    if (preset) {
+      return {
+        name: actualOrgName,
+        color: preset.color,
+        label: preset.label
+      };
+    }
+
+    // No preset found, use defaults
     return {
-      name: name.trim(),
-      color: color ? `#${color.trim()}` : '#39d353',
-      label: label?.trim() || name.trim()
+      name: inputName,
+      color: DEFAULT_COLOR,
+      label: inputName
     };
   });
 }

@@ -34,11 +34,24 @@ Vercelのダッシュボードで以下の環境変数を設定:
 | パラメータ | 説明 | デフォルト | 例 |
 |-----------|------|-----------|-----|
 | `username` | GitHubユーザー名 | `yujiteshima` | `yujiteshima` |
-| `orgs` | 組織設定 (カンマ区切り) | rails, hotwired | `rails:CC0000:Rails,hotwired:1a1a1a:Hotwire` |
+| `orgs` | 組織設定 (カンマ区切り) | rails, hotwired | `rails,vuejs,kubernetes` |
 | `months` | 表示期間 (1-12) | `6` | `3`, `6`, `12` |
+| `format` | 出力形式 | `svg` | `svg`, `png` |
 | `demo` | デモモード | `false` | `true` |
 
 ### orgs パラメータの形式
+
+**プリセットカラー（推奨）** - 組織名を指定するだけ:
+
+```
+?orgs=rails,vuejs,kubernetes
+```
+
+対応プリセット: `vercel`, `vuejs`, `react`, `angular`, `kubernetes`, `docker`, `rails`, `django`, `fastapi`, `nodejs`, `rust-lang`, `golang`, `tensorflow`, `pytorch`, `opencv`, `cupy`, `htmx` など
+
+エイリアスも使用可能: `k8s` → kubernetes, `go` → golang, `vue` → vuejs など
+
+**カスタムカラー** - 色とラベルを手動指定:
 
 ```
 組織名:色(6桁HEX):ラベル
@@ -49,9 +62,21 @@ Vercelのダッシュボードで以下の環境変数を設定:
 - `hotwired:1a1a1a:Hotwire` - hotwiredの貢献を黒色で表示
 - `honojs:E36002:Hono` - honojsの貢献をオレンジで表示
 
+**混在** - プリセットとカスタムの組み合わせ:
+
+```
+?orgs=rails,vuejs,custom:FFFFFF:My Org
+```
+
 ## カスタマイズ例
 
-### Rails + Hotwire + Hono
+### プリセットカラーを使用（簡単）
+
+```markdown
+![OSS Contributions](https://your-app.vercel.app/api/graph?username=yujiteshima&orgs=rails,vuejs,kubernetes&months=6)
+```
+
+### Rails + Hotwire + Hono（カスタムカラー）
 
 ```markdown
 ![OSS Contributions](https://your-app.vercel.app/api/graph?username=yujiteshima&orgs=rails:CC0000:Rails,hotwired:1a1a1a:Hotwire,honojs:E36002:Hono&months=6)
@@ -60,13 +85,27 @@ Vercelのダッシュボードで以下の環境変数を設定:
 ### 3ヶ月表示
 
 ```markdown
-![OSS Contributions](https://your-app.vercel.app/api/graph?username=yujiteshima&orgs=rails:CC0000:Rails&months=3)
+![OSS Contributions](https://your-app.vercel.app/api/graph?username=yujiteshima&orgs=rails&months=3)
+```
+
+### PNG出力（SNS共有用）
+
+```markdown
+![OSS Contributions](https://your-app.vercel.app/api/graph?username=yujiteshima&orgs=rails,vuejs&format=png)
+```
+
+### OGPカード（X/Twitterリンクプレビュー用）
+
+`/api/card` エンドポイントでOGPメタタグを取得:
+
+```
+https://your-app.vercel.app/api/card?username=yujiteshima&orgs=rails,vuejs
 ```
 
 ### デモモード（トークンなしで動作確認）
 
 ```markdown
-![OSS Contributions](https://your-app.vercel.app/api/graph?username=yujiteshima&demo=true)
+![OSS Contributions](https://your-app.vercel.app/api/graph?demo=true)
 ```
 
 ## ローカル開発

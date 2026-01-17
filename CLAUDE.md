@@ -54,11 +54,366 @@ npx vitest tests/utils/date.test.js
 
 ## Roadmap
 
-- [ ] [#1](https://github.com/yujiteshima/oss-contribution-graph/issues/1) Add PNG output support for social media sharing
+- [x] [#1](https://github.com/yujiteshima/oss-contribution-graph/issues/1) Add PNG output support for social media sharing
 - [ ] [#2](https://github.com/yujiteshima/oss-contribution-graph/issues/2) Add theme support (dark mode and custom color schemes)
 - [ ] [#3](https://github.com/yujiteshima/oss-contribution-graph/issues/3) Add option to hide or customize graph title
 - [ ] [#4](https://github.com/yujiteshima/oss-contribution-graph/issues/4) Add support for specifying individual repositories
 - [ ] [#5](https://github.com/yujiteshima/oss-contribution-graph/issues/5) Publish as npm package
+- [ ] [#6] プリセットカラー対応（主要OSSプロジェクト）
+- [ ] [#7] アイコン表示対応（ハイブリッド方式）
+- [ ] [#8] 自動組織検出（貢献のある組織を自動取得）
+- [ ] [#9] 凡例の折り返し対応
+- [ ] [#10] 統計情報表示（PR数、マージ数、OPEN PR数など）
+
+## プリセットカラー実装計画
+
+### 背景・目的
+
+現在、組織の色指定は `?orgs=vercel:000000:Vercel` のように手動でHEXカラーを指定する必要がある。
+主要なOSSプロジェクトのブランドカラーをプリセットとして保持し、簡単に指定できるようにする。
+
+### 使用例
+
+```
+# 現在の指定方法（変更なし）
+?orgs=vercel:000000:Vercel,facebook:0081FB:React
+
+# プリセット使用時（新機能）
+?orgs=vercel,react,kubernetes
+```
+
+### プリセット対象（初期）
+
+| 組織名 | カラー | 出典 |
+|--------|--------|------|
+| vercel | `#000000` | ブランドガイドライン |
+| react / facebook | `#61DAFB` | ロゴ色 |
+| vuejs | `#42B883` | ロゴ色 |
+| angular | `#DD0031` | ロゴ色 |
+| kubernetes | `#326CE5` | ロゴ色 |
+| nodejs | `#339933` | ロゴ色 |
+| rust-lang | `#DEA584` | ロゴ色 |
+| golang | `#00ADD8` | ロゴ色 |
+| microsoft | `#00A4EF` | ロゴ色 |
+| google | `#4285F4` | ロゴ色 |
+| aws | `#FF9900` | ロゴ色 |
+| docker | `#2496ED` | ロゴ色 |
+| tensorflow | `#FF6F00` | ロゴ色 |
+| pytorch | `#EE4C2C` | ロゴ色 |
+
+### 実装方針
+
+1. `src/presets/organizations.js` を作成
+2. `parseOrgs` 関数でプリセット解決を追加
+3. カラー指定がない場合はプリセットを参照、なければデフォルト色
+
+## アイコン表示実装計画（ハイブリッド方式）
+
+### 背景・目的
+
+OSSプロジェクトの種類が多くなると、色だけでは判別が難しくなる。
+アイコンを表示することで視認性を向上させる。
+
+### 採用方式: ハイブリッド方式
+
+複数プロジェクトが重複するセルの表現方法として「ハイブリッド方式」を採用。
+
+```
+┌──┐
+│◯│ ← 最も貢献が多い組織のアイコン（白抜き）
+└──┘
+ ↑ 背景色は全組織のグラデーション（現在の実装を維持）
+```
+
+**特徴:**
+- 背景: 現在のグラデーション表示を維持（複数組織の存在を色で表現）
+- 前景: その日で最も貢献数が多い組織のアイコンを白抜きで表示
+- ツールチップ: 従来通り全組織の詳細を表示
+
+### 使用例
+
+```
+# カラーモード（デフォルト、現在の動作）
+?orgs=vercel,react&style=color
+
+# アイコンモード（新機能）
+?orgs=vercel,react&style=icon
+```
+
+### アイコン取得方法
+
+Simple Icons (https://simpleicons.org/) のサブセットをプリセットとして同梱。
+- SVG形式で `src/presets/icons/` に配置
+- ライセンス: CC0 1.0 Universal
+
+### 実装フェーズ
+
+**フェーズ1: プリセットカラー**
+1. `src/presets/organizations.js` 作成
+2. `parseOrgs` でプリセット解決
+3. テスト追加
+
+**フェーズ2: アイコン対応**
+1. `src/presets/icons/` にSVGアイコン配置
+2. `style` パラメータ追加
+3. SVG生成時にアイコン埋め込みロジック追加
+4. 複数組織重複時は最大貢献組織のアイコンを表示
+
+**フェーズ3: 拡張（将来）**
+- カスタムアイコンURL指定
+- アイコンサイズ調整オプション
+
+## 自動組織検出実装計画
+
+### 背景・目的
+
+現在はURLで組織を手動指定する必要がある（`?orgs=vercel,react`）。
+ユーザーが貢献した組織を自動検出し、設定不要で表示できるようにする。
+
+### 使用例
+
+```
+# 自動検出モード（新機能）
+?username=yujiteshima&auto=true
+
+# 特定組織のみ除外
+?username=yujiteshima&auto=true&exclude=my-company
+
+# 自動検出 + 手動追加の併用
+?username=yujiteshima&auto=true&orgs=extra-org
+```
+
+### GitHub GraphQL API
+
+```graphql
+query($username: String!, $from: DateTime!, $to: DateTime!) {
+  user(login: $username) {
+    contributionsCollection(from: $from, to: $to) {
+      commitContributionsByRepository {
+        repository {
+          owner {
+            login
+            ... on Organization {
+              id
+              name
+            }
+          }
+          name
+        }
+        contributions {
+          totalCount
+        }
+      }
+    }
+  }
+}
+```
+
+### 実現可能性: 高い
+
+**メリット:**
+- URL設定が大幅に簡略化
+- 新しい貢献先が自動で表示される
+
+**制約:**
+- プライベートリポジトリは取得不可（メンバーでない組織）
+- API Rate Limit（5000 req/hour）に注意
+- 組織数が多い場合のパフォーマンス考慮が必要
+
+### 実装方針
+
+1. `src/github/queries.js` に自動検出用クエリ追加
+2. `src/github/contributions.js` に `getContributedOrganizations` 関数追加
+3. `api/graph.js` で `auto=true` パラメータ処理
+4. プリセットカラーと連携（検出した組織にプリセット色を適用）
+
+## 凡例折り返し実装計画
+
+### 背景・目的
+
+組織数が多くなるとSVGの幅を超えて凡例が見切れる。
+自動折り返しで全ての凡例を表示可能にする。
+
+### 現在の問題
+
+```
+[React] [Vue] [Angular] [Kubernetes] [Docker] [Node.js]... (はみ出す)
+```
+
+### 改善後
+
+```
+[React] [Vue] [Angular] [Kubernetes]
+[Docker] [Node.js] [Rust] [Go]
+```
+
+### 実現可能性: 高い
+
+### 実装方針
+
+1. `src/svg/generator.js` の凡例生成ロジックを修正
+2. SVG幅に基づいて自動改行位置を計算
+3. 凡例の高さを動的に調整（組織数に応じてSVG全体の高さも変更）
+
+### パラメータ
+
+```
+# 凡例の最大列数を指定（オプション）
+?legendCols=4
+```
+
+## 凡例表示名のリポジトリ名対応
+
+### 背景・目的
+
+現在は組織名がそのまま表示される。
+リポジトリ単位で貢献を追跡する場合、リポジトリ名を表示したい。
+
+### 使用例
+
+```
+# 組織名表示（現在のデフォルト）
+凡例: [facebook] [vercel]
+
+# リポジトリ名表示（新機能）
+凡例: [react] [next.js] [turborepo]
+```
+
+### 実現可能性: 高い
+
+自動組織検出と組み合わせることで、リポジトリ単位のデータを保持できる。
+
+### 実装方針
+
+1. 内部データ構造をリポジトリ単位に拡張
+2. `?groupBy=repo` パラメータで切り替え（デフォルトは `org`）
+3. 凡例表示名はリポジトリ名を使用
+
+## 統計情報表示実装計画
+
+### 背景・目的
+
+貢献グラフに加えて、詳細な統計情報を表示したい。
+- 各OSSへの総コントリビュート数
+- PR作成数、マージ数
+- 現在OPENなPR数
+
+### 使用例
+
+```
+# 統計情報を含める
+?stats=true
+
+# 統計情報のみ（グラフなし）
+?statsOnly=true
+```
+
+### 表示イメージ
+
+```
+┌─────────────────────────────────────────────────────┐
+│ 🌈 OSS Contributions - yujiteshima                   │
+├─────────────────────────────────────────────────────┤
+│ [カレンダーグラフ]                                    │
+├─────────────────────────────────────────────────────┤
+│ 📊 Statistics (Last 6 months)                        │
+│                                                      │
+│ Repository      Commits  PRs  Merged  Open          │
+│ ─────────────────────────────────────────           │
+│ vercel/next.js      45    12     10     2           │
+│ facebook/react      23     5      5     0           │
+│ vuejs/core          12     3      2     1           │
+│ ─────────────────────────────────────────           │
+│ Total              80    20     17     3           │
+└─────────────────────────────────────────────────────┘
+```
+
+### GitHub GraphQL API
+
+```graphql
+query($username: String!, $from: DateTime!, $to: DateTime!) {
+  user(login: $username) {
+    contributionsCollection(from: $from, to: $to) {
+      totalCommitContributions
+      totalPullRequestContributions
+      totalPullRequestReviewContributions
+      totalIssueContributions
+
+      commitContributionsByRepository(maxRepositories: 100) {
+        repository {
+          owner { login }
+          name
+        }
+        contributions { totalCount }
+      }
+
+      pullRequestContributionsByRepository(maxRepositories: 100) {
+        repository {
+          owner { login }
+          name
+        }
+        contributions { totalCount }
+      }
+    }
+
+    # 現在OPENなPR（組織フィルタなし）
+    pullRequests(states: OPEN, first: 100, orderBy: {field: CREATED_AT, direction: DESC}) {
+      totalCount
+      nodes {
+        repository {
+          owner { login }
+          name
+        }
+        merged
+        state
+      }
+    }
+  }
+}
+```
+
+### 実現可能性
+
+| 統計項目 | 実現可能性 | 備考 |
+|---------|-----------|------|
+| コミット数 | **高** | `commitContributionsByRepository` |
+| PR作成数 | **高** | `pullRequestContributionsByRepository` |
+| マージ数 | **中** | 別クエリで `merged: true` フィルタ必要 |
+| OPEN PR数 | **高** | `pullRequests(states: OPEN)` |
+| Issue数 | **高** | `issueContributionsByRepository` |
+| レビュー数 | **高** | `pullRequestReviewContributions` |
+
+### 実装方針
+
+1. `src/github/queries.js` に統計用クエリ追加
+2. `src/github/stats.js` を新規作成
+3. `src/svg/stats.js` で統計テーブルSVG生成
+4. `src/svg/generator.js` でグラフと統計を結合
+5. PNG出力時も統計テーブルを含める
+
+### 実装フェーズ
+
+**フェーズ1: 基本統計**
+- コミット数、PR数の取得と表示
+
+**フェーズ2: 詳細統計**
+- マージ数、OPEN PR数の追加
+- リポジトリ別の内訳表示
+
+**フェーズ3: 拡張**
+- Issue数、レビュー数の追加
+- 期間比較（前月比など）
+
+## 実装優先順位（推奨）
+
+| 優先度 | 機能 | 理由 |
+|--------|------|------|
+| 1 | プリセットカラー (#6) | 基盤機能、他の機能の前提 |
+| 2 | 自動組織検出 (#8) | UX大幅改善、URL設定不要に |
+| 3 | 凡例折り返し (#9) | 自動検出と組み合わせで必須 |
+| 4 | 統計情報表示 (#10) | 差別化機能、価値が高い |
+| 5 | アイコン表示 (#7) | Nice to have |
+| 6 | テーマサポート (#2) | Nice to have |
 
 ## OGP Implementation Plan
 

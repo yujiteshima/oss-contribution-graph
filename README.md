@@ -33,11 +33,24 @@ Configure the following environment variable in the Vercel dashboard:
 | Parameter | Description | Default | Example |
 |-----------|-------------|---------|---------|
 | `username` | GitHub username | `yujiteshima` | `yujiteshima` |
-| `orgs` | Organization settings (comma-separated) | rails, hotwired | `rails:CC0000:Rails,hotwired:1a1a1a:Hotwire` |
+| `orgs` | Organization settings (comma-separated) | rails, hotwired | `rails,vuejs,kubernetes` |
 | `months` | Display period (1-12) | `6` | `3`, `6`, `12` |
+| `format` | Output format | `svg` | `svg`, `png` |
 | `demo` | Demo mode | `false` | `true` |
 
 ### orgs Parameter Format
+
+**Preset colors (Recommended)** - Just specify organization names:
+
+```
+?orgs=rails,vuejs,kubernetes
+```
+
+Supported presets include: `vercel`, `vuejs`, `react`, `angular`, `kubernetes`, `docker`, `rails`, `django`, `fastapi`, `nodejs`, `rust-lang`, `golang`, `tensorflow`, `pytorch`, `opencv`, `cupy`, `htmx`, and more.
+
+Aliases are also supported: `k8s` → kubernetes, `go` → golang, `vue` → vuejs, etc.
+
+**Custom colors** - Specify color and label manually:
 
 ```
 organization:color(6-digit HEX):label
@@ -48,9 +61,21 @@ Examples:
 - `hotwired:1a1a1a:Hotwire` - Display Hotwire contributions in black
 - `honojs:E36002:Hono` - Display Hono contributions in orange
 
+**Mixed** - Combine presets and custom:
+
+```
+?orgs=rails,vuejs,custom:FFFFFF:My Org
+```
+
 ## Customization Examples
 
-### Rails + Hotwire + Hono
+### Using Preset Colors (Simple)
+
+```markdown
+![OSS Contributions](https://your-app.vercel.app/api/graph?username=yujiteshima&orgs=rails,vuejs,kubernetes&months=6)
+```
+
+### Rails + Hotwire + Hono (Custom Colors)
 
 ```markdown
 ![OSS Contributions](https://your-app.vercel.app/api/graph?username=yujiteshima&orgs=rails:CC0000:Rails,hotwired:1a1a1a:Hotwire,honojs:E36002:Hono&months=6)
@@ -59,13 +84,27 @@ Examples:
 ### 3-Month Display
 
 ```markdown
-![OSS Contributions](https://your-app.vercel.app/api/graph?username=yujiteshima&orgs=rails:CC0000:Rails&months=3)
+![OSS Contributions](https://your-app.vercel.app/api/graph?username=yujiteshima&orgs=rails&months=3)
+```
+
+### PNG Output (for social media sharing)
+
+```markdown
+![OSS Contributions](https://your-app.vercel.app/api/graph?username=yujiteshima&orgs=rails,vuejs&format=png)
+```
+
+### OGP Card (for X/Twitter link preview)
+
+Use `/api/card` endpoint for OGP meta tags:
+
+```
+https://your-app.vercel.app/api/card?username=yujiteshima&orgs=rails,vuejs
 ```
 
 ### Demo Mode (Test without token)
 
 ```markdown
-![OSS Contributions](https://your-app.vercel.app/api/graph?username=yujiteshima&demo=true)
+![OSS Contributions](https://your-app.vercel.app/api/graph?demo=true)
 ```
 
 ## Local Development
