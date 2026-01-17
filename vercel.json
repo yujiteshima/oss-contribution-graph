@@ -5,5 +5,10 @@
       "destination": "/api/graph?demo=true",
       "permanent": false
     }
-  ]
+  ],
+  "functions": {
+    "api/graph.js": {
+      "includeFiles": "src/png/fonts/**"
+    }
+  }
 }
