@@ -6,15 +6,26 @@ import { dirname, join } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Load font file once at module initialization
+// Load and encode font as Base64 at module initialization
 const fontPath = join(__dirname, 'fonts', 'NotoSans-Regular.ttf');
-let fontData = null;
+const fontBuffer = readFileSync(fontPath);
+const fontBase64 = fontBuffer.toString('base64');
 
-function loadFont() {
-  if (!fontData) {
-    fontData = readFileSync(fontPath);
-  }
-  return fontData;
+/**
+ * Embed font directly into SVG using @font-face with Base64 data URL
+ * This ensures the font travels with the SVG and works in any environment
+ * @param {string} svg - SVG string
+ * @returns {string} SVG with embedded font
+ */
+function embedFontInSvg(svg) {
+  const fontFaceCss = `
+    @font-face {
+      font-family: 'Noto Sans';
+      src: url(data:font/truetype;base64,${fontBase64}) format('truetype');
+    }
+    text { font-family: 'Noto Sans', sans-serif; }
+  `;
+  return svg.replace('<style>', `<style>${fontFaceCss}`);
 }
 
 /**
@@ -24,11 +35,10 @@ function loadFont() {
  * @returns {Buffer} PNG image buffer
  */
 export function convertSvgToPng(svg, scale = 2) {
-  const font = loadFont();
+  const svgWithFont = embedFontInSvg(svg);
 
-  const resvg = new Resvg(svg, {
+  const resvg = new Resvg(svgWithFont, {
     font: {
-      fontBuffers: [font],
       loadSystemFonts: false,
       defaultFontFamily: 'Noto Sans',
     },
