@@ -66,7 +66,7 @@ export function generateSVG(gridData, organizations, months, username, options =
   organizations.forEach((org) => {
     legend += `
       <rect x="${legendX}" y="${legendY}" width="12" height="12" rx="2" fill="${org.color}" />
-      <text x="${legendX + 16}" y="${legendY + 10}" font-size="10" fill="#666">${org.label || org.name}</text>
+      <text x="${legendX + 16}" y="${legendY + 10}" font-size="10" fill="#666" font-family="'Noto Sans', sans-serif">${org.label || org.name}</text>
     `;
     legendX += (org.label || org.name).length * 7 + 30;
   });
@@ -74,19 +74,19 @@ export function generateSVG(gridData, organizations, months, username, options =
   // Generate month labels
   let monthLabelsStr = '';
   monthLabels.forEach(label => {
-    monthLabelsStr += `<text x="${label.x}" y="${titleHeight + monthLabelHeight - 5}" font-size="10" fill="#666">${label.name}</text>`;
+    monthLabelsStr += `<text x="${label.x}" y="${titleHeight + monthLabelHeight - 5}" font-size="10" fill="#666" font-family="'Noto Sans', sans-serif">${label.name}</text>`;
   });
 
   // Day labels
   const dayLabels = `
-    <text x="${padding - 5}" y="${gridTop + 1 * (cellSize + gap) + cellSize/2 + 3}" font-size="9" fill="#666" text-anchor="end">Mon</text>
-    <text x="${padding - 5}" y="${gridTop + 3 * (cellSize + gap) + cellSize/2 + 3}" font-size="9" fill="#666" text-anchor="end">Wed</text>
-    <text x="${padding - 5}" y="${gridTop + 5 * (cellSize + gap) + cellSize/2 + 3}" font-size="9" fill="#666" text-anchor="end">Fri</text>
+    <text x="${padding - 5}" y="${gridTop + 1 * (cellSize + gap) + cellSize/2 + 3}" font-size="9" fill="#666" text-anchor="end" font-family="'Noto Sans', sans-serif">Mon</text>
+    <text x="${padding - 5}" y="${gridTop + 3 * (cellSize + gap) + cellSize/2 + 3}" font-size="9" fill="#666" text-anchor="end" font-family="'Noto Sans', sans-serif">Wed</text>
+    <text x="${padding - 5}" y="${gridTop + 5 * (cellSize + gap) + cellSize/2 + 3}" font-size="9" fill="#666" text-anchor="end" font-family="'Noto Sans', sans-serif">Fri</text>
   `;
 
   // Title (emoji removed for PNG compatibility when forPng is true)
   const titlePrefix = options.forPng ? '' : '🌈 ';
-  const title = `<text x="${padding}" y="18" font-size="14" font-weight="bold" fill="#333">${titlePrefix}OSS Contributions - ${username}</text>`;
+  const title = `<text x="${padding}" y="18" font-size="14" font-weight="bold" fill="#333" font-family="'Noto Sans', sans-serif">${titlePrefix}OSS Contributions - ${username}</text>`;
 
   return `
 <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
