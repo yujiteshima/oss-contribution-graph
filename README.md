@@ -8,32 +8,36 @@ A tool that displays contributions to multiple OSS projects in a single color-co
 
 ![OSS Contribution Graph](https://oss-contribution-graph.vercel.app/api/graph?demo=true)
 
-## Usage
+## Quick Start
 
-### 1. Deploy
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yourusername/oss-contribution-graph)
-
-### 2. Set Environment Variables
-
-Configure the following environment variable in the Vercel dashboard:
-
-| Variable | Description |
-|----------|-------------|
-| `GITHUB_TOKEN` | GitHub Personal Access Token (read:user scope) |
-
-### 3. Embed in README.md
+Add the following to your GitHub Profile README. Just replace `YOUR_USERNAME` with your GitHub username:
 
 ```markdown
-![OSS Contributions](https://your-deployment.vercel.app/api/graph?username=YOUR_USERNAME&orgs=rails:CC0000:Rails,hotwired:1a1a1a:Hotwire&months=6)
+![OSS Contributions](https://oss-contribution-graph.vercel.app/api/graph?username=YOUR_USERNAME&auto=true)
+```
+
+With `auto=true`, the tool automatically detects organizations you've contributed to via the GitHub API — no manual configuration needed.
+
+### Want to specify organizations manually?
+
+```markdown
+![OSS Contributions](https://oss-contribution-graph.vercel.app/api/graph?username=YOUR_USERNAME&orgs=react,vuejs,kubernetes)
+```
+
+### Combine auto-detection with manual additions
+
+```markdown
+![OSS Contributions](https://oss-contribution-graph.vercel.app/api/graph?username=YOUR_USERNAME&auto=true&orgs=extra-org)
 ```
 
 ## Parameters
 
 | Parameter | Description | Default | Example |
 |-----------|-------------|---------|---------|
-| `username` | GitHub username | `yujiteshima` | `yujiteshima` |
-| `orgs` | Organization settings (comma-separated) | rails, hotwired | `rails,vuejs,kubernetes` |
+| `username` | GitHub username | - | `yujiteshima` |
+| `auto` | Auto-detect contributed organizations | `false` | `true` |
+| `orgs` | Organization settings (comma-separated) | - | `rails,vuejs,kubernetes` |
+| `exclude` | Exclude organizations in auto mode (comma-separated) | - | `my-company,work-org` |
 | `months` | Display period (1-12) | `6` | `3`, `6`, `12` |
 | `format` | Output format | `svg` | `svg`, `png` |
 | `demo` | Demo mode | `false` | `true` |
@@ -69,28 +73,40 @@ Examples:
 
 ## Customization Examples
 
-### Using Preset Colors (Simple)
+### Auto-Detection (Simplest)
 
 ```markdown
-![OSS Contributions](https://your-app.vercel.app/api/graph?username=yujiteshima&orgs=rails,vuejs,kubernetes&months=6)
+![OSS Contributions](https://oss-contribution-graph.vercel.app/api/graph?username=YOUR_USERNAME&auto=true)
 ```
 
-### Rails + Hotwire + Hono (Custom Colors)
+### Auto-Detection with Exclusions
 
 ```markdown
-![OSS Contributions](https://your-app.vercel.app/api/graph?username=yujiteshima&orgs=rails:CC0000:Rails,hotwired:1a1a1a:Hotwire,honojs:E36002:Hono&months=6)
+![OSS Contributions](https://oss-contribution-graph.vercel.app/api/graph?username=YOUR_USERNAME&auto=true&exclude=my-company)
+```
+
+### Using Preset Colors
+
+```markdown
+![OSS Contributions](https://oss-contribution-graph.vercel.app/api/graph?username=YOUR_USERNAME&orgs=rails,vuejs,kubernetes&months=6)
+```
+
+### Custom Colors
+
+```markdown
+![OSS Contributions](https://oss-contribution-graph.vercel.app/api/graph?username=YOUR_USERNAME&orgs=rails:CC0000:Rails,hotwired:1a1a1a:Hotwire,honojs:E36002:Hono&months=6)
 ```
 
 ### 3-Month Display
 
 ```markdown
-![OSS Contributions](https://your-app.vercel.app/api/graph?username=yujiteshima&orgs=rails&months=3)
+![OSS Contributions](https://oss-contribution-graph.vercel.app/api/graph?username=YOUR_USERNAME&orgs=rails&months=3)
 ```
 
 ### PNG Output (for social media sharing)
 
 ```markdown
-![OSS Contributions](https://your-app.vercel.app/api/graph?username=yujiteshima&orgs=rails,vuejs&format=png)
+![OSS Contributions](https://oss-contribution-graph.vercel.app/api/graph?username=YOUR_USERNAME&orgs=rails,vuejs&format=png)
 ```
 
 ### OGP Card (for X/Twitter link preview)
@@ -98,13 +114,37 @@ Examples:
 Use `/api/card` endpoint for OGP meta tags:
 
 ```
-https://your-app.vercel.app/api/card?username=yujiteshima&orgs=rails,vuejs
+https://oss-contribution-graph.vercel.app/api/card?username=YOUR_USERNAME&orgs=rails,vuejs
 ```
 
 ### Demo Mode (Test without token)
 
 ```markdown
-![OSS Contributions](https://your-app.vercel.app/api/graph?demo=true)
+![OSS Contributions](https://oss-contribution-graph.vercel.app/api/graph?demo=true)
+```
+
+## Self-Hosting
+
+If you prefer to host your own instance:
+
+### 1. Deploy
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yujiteshima/oss-contribution-graph)
+
+### 2. Set Environment Variables
+
+Configure the following environment variable in the Vercel dashboard:
+
+| Variable | Description |
+|----------|-------------|
+| `GITHUB_TOKEN` | GitHub Personal Access Token (read:user, read:org scopes) |
+
+### 3. Embed in README.md
+
+Replace the domain with your own deployment URL:
+
+```markdown
+![OSS Contributions](https://your-deployment.vercel.app/api/graph?username=YOUR_USERNAME&auto=true)
 ```
 
 ## Local Development
@@ -128,9 +168,16 @@ npm run dev
 ## How It Works
 
 1. Fetch organization ID via GitHub GraphQL API
-2. Filter contributions per organization using `contributionsCollection(organizationID: $orgId)`
-3. Merge data from multiple organizations
-4. Output as SVG image
+2. In auto mode, detect organizations from `commitContributionsByRepository`
+3. Filter contributions per organization using `contributionsCollection(organizationID: $orgId)`
+4. Merge data from multiple organizations
+5. Output as SVG image
+
+## Feedback & Contributions
+
+If you find this tool useful, please consider giving it a star! It helps others discover the project.
+
+Have ideas for new features or found a bug? Feel free to open an [issue](https://github.com/yujiteshima/oss-contribution-graph/issues). All feedback and feature requests are welcome!
 
 ## License
 
