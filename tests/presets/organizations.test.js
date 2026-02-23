@@ -2,8 +2,10 @@ import { describe, it, expect } from 'vitest';
 import {
   ORGANIZATION_PRESETS,
   ORGANIZATION_ALIASES,
+  AUTO_DETECT_PALETTE,
   getOrganizationPreset,
   getOrganizationName,
+  getAutoDetectColor,
 } from '../../src/presets/organizations.js';
 
 describe('ORGANIZATION_PRESETS', () => {
@@ -83,5 +85,44 @@ describe('ORGANIZATION_ALIASES', () => {
     expect(ORGANIZATION_ALIASES.vue).toBe('vuejs');
     expect(ORGANIZATION_ALIASES.go).toBe('golang');
     expect(ORGANIZATION_ALIASES.rust).toBe('rust-lang');
+  });
+});
+
+describe('AUTO_DETECT_PALETTE', () => {
+  it('has at least 10 distinct colors', () => {
+    expect(AUTO_DETECT_PALETTE.length).toBeGreaterThanOrEqual(10);
+    const unique = new Set(AUTO_DETECT_PALETTE);
+    expect(unique.size).toBe(AUTO_DETECT_PALETTE.length);
+  });
+
+  it('all colors are valid hex format', () => {
+    for (const color of AUTO_DETECT_PALETTE) {
+      expect(color).toMatch(/^#[0-9A-Fa-f]{6}$/);
+    }
+  });
+});
+
+describe('getAutoDetectColor', () => {
+  it('returns preset color for known org', () => {
+    const result = getAutoDetectColor('vuejs', 0);
+    expect(result.color).toBe('#42B883');
+    expect(result.label).toBe('Vue.js');
+  });
+
+  it('returns palette color for unknown org', () => {
+    const result = getAutoDetectColor('unknown-org', 0);
+    expect(result.color).toBe(AUTO_DETECT_PALETTE[0]);
+    expect(result.label).toBe('unknown-org');
+  });
+
+  it('cycles palette for high index', () => {
+    const result = getAutoDetectColor('unknown', AUTO_DETECT_PALETTE.length);
+    expect(result.color).toBe(AUTO_DETECT_PALETTE[0]);
+  });
+
+  it('returns different palette colors for different indices', () => {
+    const color0 = getAutoDetectColor('org-a', 0);
+    const color1 = getAutoDetectColor('org-b', 1);
+    expect(color0.color).not.toBe(color1.color);
   });
 });

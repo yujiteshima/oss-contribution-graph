@@ -1,7 +1,7 @@
 // Vercel Serverless Function - OGP Card for X (Twitter) link preview
 
 export default async function handler(req, res) {
-  const { username = 'yujiteshima', orgs, months = '6', demo } = req.query;
+  const { username = 'yujiteshima', orgs, months = '6', demo, auto, exclude } = req.query;
 
   // Build the image URL with same parameters
   // Use http for localhost, https for production
@@ -14,6 +14,8 @@ export default async function handler(req, res) {
   params.set('months', months);
   params.set('format', 'png');
   if (demo === 'true') params.set('demo', 'true');
+  if (auto === 'true') params.set('auto', 'true');
+  if (exclude) params.set('exclude', exclude);
 
   const imageUrl = `${baseUrl}/api/graph?${params.toString()}`;
   const pageUrl = `${baseUrl}/api/card?${req.url.split('?')[1] || ''}`;

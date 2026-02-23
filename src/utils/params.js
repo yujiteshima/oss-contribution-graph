@@ -1,6 +1,6 @@
 // Parse URL parameters
 
-import { getOrganizationPreset, getOrganizationName } from '../presets/organizations.js';
+import { getOrganizationPreset, getOrganizationName, getAutoDetectColor } from '../presets/organizations.js';
 
 // Default color for organizations without a preset
 const DEFAULT_COLOR = '#39d353';
@@ -79,4 +79,65 @@ export function parseOrgs(orgsParam) {
       label: inputName
     };
   });
+}
+
+/**
+ * Parse the auto parameter
+ * @param {string} autoParam - 'true' or undefined
+ * @returns {boolean}
+ */
+export function parseAuto(autoParam) {
+  return autoParam === 'true';
+}
+
+/**
+ * Parse the exclude parameter (comma-separated org names to exclude)
+ * @param {string} excludeParam - e.g., 'my-company,another-org'
+ * @returns {string[]}
+ */
+export function parseExclude(excludeParam) {
+  if (!excludeParam) return [];
+  return excludeParam.split(',').map(name => name.trim().toLowerCase()).filter(Boolean);
+}
+
+/**
+ * Build the final organizations array by merging auto-detected and manual orgs.
+ * Manual orgs take precedence over detected orgs with the same name.
+ *
+ * @param {Array<{login: string, id: string, totalContributions: number}>} detectedOrgs
+ * @param {Array<{name: string, color: string, label: string}>} manualOrgs
+ * @param {string[]} excludeList
+ * @returns {Array<{name: string, color: string, label: string, id?: string}>}
+ */
+export function buildOrganizations(detectedOrgs, manualOrgs, excludeList) {
+  const result = [];
+  const seen = new Set();
+
+  // Manual orgs first (take precedence)
+  for (const org of manualOrgs) {
+    seen.add(org.name.toLowerCase());
+    result.push(org);
+  }
+
+  // Auto-detected orgs (skip duplicates and excluded)
+  let paletteIndex = 0;
+  for (const detected of detectedOrgs) {
+    const login = detected.login.toLowerCase();
+
+    if (seen.has(login)) continue;
+    if (excludeList.includes(login)) continue;
+
+    const { color, label } = getAutoDetectColor(detected.login, paletteIndex);
+    if (!getOrganizationPreset(detected.login)) paletteIndex++;
+
+    seen.add(login);
+    result.push({
+      name: detected.login,
+      color,
+      label,
+      id: detected.id,
+    });
+  }
+
+  return result;
 }
