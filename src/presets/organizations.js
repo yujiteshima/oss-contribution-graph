@@ -108,6 +108,41 @@ export function getOrganizationPreset(name) {
 }
 
 /**
+ * Color palette for auto-detected organizations that don't have a preset.
+ * Colors are chosen to be visually distinct from each other.
+ */
+export const AUTO_DETECT_PALETTE = [
+  '#E377C2',  // pink
+  '#17BECF',  // cyan
+  '#BCBD22',  // olive
+  '#9467BD',  // purple
+  '#8C564B',  // brown
+  '#7F7F7F',  // gray
+  '#2CA02C',  // green
+  '#FF7F0E',  // orange
+  '#1F77B4',  // blue
+  '#D62728',  // red
+];
+
+/**
+ * Get color and label for an auto-detected organization.
+ * Uses preset if available, otherwise cycles through the palette.
+ * @param {string} orgLogin - GitHub organization login
+ * @param {number} paletteIndex - Index for palette cycling (for non-preset orgs)
+ * @returns {{ color: string, label: string }}
+ */
+export function getAutoDetectColor(orgLogin, paletteIndex) {
+  const preset = getOrganizationPreset(orgLogin);
+  if (preset) {
+    return { color: preset.color, label: preset.label };
+  }
+  return {
+    color: AUTO_DETECT_PALETTE[paletteIndex % AUTO_DETECT_PALETTE.length],
+    label: orgLogin,
+  };
+}
+
+/**
  * Get the actual GitHub organization name for a preset
  * Some presets (like 'react') map to a different org ('facebook')
  * @param {string} name - Preset name
